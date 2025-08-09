@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gemini AI Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; }
+    #chat-container { width: 400px; margin: 50px auto; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 10px; }
+    #messages { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; }
+    .msg { padding: 5px; margin: 5px 0; border-radius: 5px; }
+    .user { background: #d1e7ff; text-align: right; }
+    .bot { background: #e8f5e9; text-align: left; }
+    #input-container { display: flex; margin-top: 10px; }
+    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px; background: #4cafef; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div id="chat-container">
+  <h2>💬 Gemini AI Chatbot</h2>
+  <div id="messages"></div>
+  <div id="input-container">
+    <input type="text" id="user-input" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+const API_KEY = "AIzaSyBOMilWRaqG6VF16XJYPJ3Kw9zNSvWMCEs"; // Your API Key
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+async function sendMessage() {
+  const inputField = document.getElementById("user-input");
+  const message = inputField.value.trim();
+  if (!message) return;
+
+  appendMessage("You", message, "user");
+  inputField.value = "";
+
+  try {
+    const res = await fetch(`${API_URL}?key=${API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: message }] }]
+      })
+    });
+
+    const data = await res.json();
+    const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+    appendMessage("Gemini", botReply, "bot");
+  } catch (error) {
+    appendMessage("Gemini", "Error fetching response.", "bot");
+    console.error(error);
+  }
+}
+
+function appendMessage(sender, text, type) {
+  const messages = document.getElementById("messages");
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `msg ${type}`;
+  msgDiv.textContent = `${sender}: ${text}`;
+  messages.appendChild(msgDiv);
+  messages.scrollTop = messages.scrollHeight;
+}
+</script>
+
+</body>
+</html>
